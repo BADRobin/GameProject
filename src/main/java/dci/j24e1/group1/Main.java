@@ -1,5 +1,11 @@
 package dci.j24e1.group1;
 
+import dci.j24e1.group1.command.Command;
+import dci.j24e1.group1.command.CreateRandomDirectionCommand;
+import dci.j24e1.group1.command.MoveCommand;
+import dci.j24e1.group1.types.Area;
+import dci.j24e1.group1.types.Direction;
+
 import java.sql.*;
 import java.util.Scanner;
 
@@ -13,18 +19,40 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
         boolean gameRunning = true;
+        GameState gs = new GameState();
+
+        new CreateRandomDirectionCommand().execute(gs);
+
+
+
+
+
         while (gameRunning) {
+            System.out.println("Where do you want to go? And why? It's dangerous!");
+            System.out.println("[left] for " + gs.getToLeft() + " | [right] for " + gs.getToRight());
+            System.out.print("> ");
             String input = scanner.nextLine();
             switch (input) {
-                case "go left" :
-                    System.out.println("Ok. I going left"); break;
+                case "left":
+                    Command moveLeft = new MoveCommand(Direction.LEFT);
+                    moveLeft.execute(gs);
+                    new CreateRandomDirectionCommand().execute(gs);
+                    System.out.println("Ok. You swam in the " + gs.getLocation());
+                    break;
+                case "right":
+                    Command moveRight = new MoveCommand(Direction.RIGHT);
+                    moveRight.execute(gs);
+                    new CreateRandomDirectionCommand().execute(gs);
+                    System.out.println("Ok. You swam in the " + gs.getLocation());
+                    break;
                 case "quit":
-                    gameRunning = false; break;
+                    gameRunning = false;
+                    break;
                 case null, default:
                     System.out.println("Invalid input");
 
             }
         }
-        System.out.println("Goodbye! See you... never!!!" );
+        System.out.println("Goodbye! See you... never!!!");
     }
 }
