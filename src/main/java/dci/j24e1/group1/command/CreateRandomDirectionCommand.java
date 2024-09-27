@@ -2,40 +2,57 @@ package dci.j24e1.group1.command;
 
 import dci.j24e1.group1.GameState;
 import dci.j24e1.group1.types.Area;
+import dci.j24e1.group1.types.Danger;
+import dci.j24e1.group1.types.Location;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Random;
 
 public class CreateRandomDirectionCommand implements Command {
-    private static final Area STARTING_AREA = Area.SPRING;
-
     @Override
     public void execute(GameState gs) {
-        Random random = new Random();
-        Area[] values = Area.values();
+        // generate left Location
+        Area[] availableAreasForLeft = this.getFilteredAreas(Area.values(), Area.SPRING);
+        Location nextLeft = this.generateRandomLocation(availableAreasForLeft);
+        gs.setNextLeft(nextLeft);
+        // generate right Location
+        Area[] availableAreasForRight = this.getFilteredAreas(
+                availableAreasForLeft,
+                gs.getNextLeft().getArea()
+        );
+        Location nextRight = this.generateRandomLocation(availableAreasForRight);
+        gs.setNextRight(nextRight);
+    }
 
-        List<Area> availableAreas = new ArrayList<>();
-        for (Area area : values) {
-            if (area != STARTING_AREA) {
-                availableAreas.add(area);
+    private Area[] getFilteredAreas(Area[] values, Area toExclude) {
+        return Arrays
+                .stream(values)
+                .filter(x -> x != toExclude)
+                .toArray(Area[]::new);
+    }
+
+    private Location generateRandomLocation(Area[] availableAreas) {
+        Random rand = new Random();
+        int areaIndex = rand.nextInt(availableAreas.length);
+        Area area = availableAreas[areaIndex];
+
+        int rewards = rand.nextInt(4);
+
+        Danger danger = Danger.NONE;
+        if (rewards == 3) {
+            danger = Danger.BEAR_SHARK;
+        } else if (rewards == 2) {
+            switch (area) {
+                case LAKE, RIVER -> danger = Danger.BEAR;
+                case OCEAN -> danger = Danger.SHARK;
+                case AQUIFER, SEA, CANAL -> danger = Danger.JELLYFISH;
+            }
+        } else if (rewards == 1) {
+            switch (area) {
+                case LAKE, RIVER, OCEAN, AQUIFER, SEA, CANAL -> danger = Danger.JELLYFISH;
             }
         }
 
-        int randomLeftIndex = random.nextInt(availableAreas.size());
-        Area leftDirection = availableAreas.get(randomLeftIndex);
-
-
-        availableAreas.remove(randomLeftIndex);
-        int randomRightIndex = random.nextInt(availableAreas.size());
-        Area rightDirection = availableAreas.get(randomRightIndex);
-
-        gs.setToLeft(leftDirection);
-        gs.setToRight(rightDirection);
-
-//        int randomLeft = random.nextInt(values.length);
-//        gs.setToLeft(values[randomLeft]);
-//        int randomRight = random.nextInt(values.length);
-//        gs.setToRight(values[randomRight]);
+        return new Location(area, rewards, danger);
     }
 }

@@ -2,7 +2,11 @@ package dci.j24e1.group1.command;
 
 import dci.j24e1.group1.GameState;
 import dci.j24e1.group1.types.Area;
+import dci.j24e1.group1.types.Danger;
 import dci.j24e1.group1.types.Direction;
+import dci.j24e1.group1.types.Location;
+
+import java.util.Random;
 
 public class MoveCommand implements Command {
 
@@ -12,20 +16,50 @@ public class MoveCommand implements Command {
         this.direction = direction;
     }
 
+
     @Override
-    public void execute(GameState gs) {
+    public void execute(GameState gs) throws Exception {
+        gs.decreaseStepsRemaining();
 
-        //direction
+        Location nextLocation;
         if (this.direction == Direction.LEFT) {
-            Area next = gs.getToLeft();
-            gs.setLocation(next);
+            nextLocation = gs.getNextLeft();
         } else if (this.direction == Direction.RIGHT) {
-            Area next = gs.getToRight();
-            gs.setLocation(next);
-
+            nextLocation = gs.getNextRight();
         } else {
-            throw new RuntimeException("Invalid direction: " + this.direction);
+            throw new RuntimeException("This direction is not implemented in the MoveCommand");
         }
 
+        gs.setCurrentArea(nextLocation.getArea());
+
+        // We will check for danger and only reward if nothing happens
+        // switch-case depending on the kind of danger: Bear/Shark: 30%, BEAR_SHARK: 50%
+        Random rnd = new Random();
+        int result = rnd.nextInt(100);
+        boolean giveReward = true;
+        switch (nextLocation.getDanger()) {
+            case Danger.BEAR, Danger.SHARK -> {
+                if (result < 30) {
+                    gs.setEatenBy(nextLocation.getDanger());
+                    giveReward = false;
+                }
+            }
+            case BEAR_SHARK -> {
+                if (result < 50) {
+                    gs.setEatenBy(nextLocation.getDanger());
+                    giveReward = false;
+                }
+            }
+            case JELLYFISH -> {
+                if (result < 70) {
+                    gs.removeScales(1);
+                    System.out.println("A Jellyfish stole 1 of your Scales");
+                    giveReward = false;
+                }
+            }
+        }
+        if (giveReward) {
+            gs.addScales(nextLocation.getReward());
+        }
     }
 }

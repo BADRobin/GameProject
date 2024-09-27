@@ -2,34 +2,70 @@ package dci.j24e1.group1;
 
 
 import dci.j24e1.group1.types.Area;
+import dci.j24e1.group1.types.Danger;
+import dci.j24e1.group1.types.Location;
 
 public class GameState {
 
-    Area location = Area.SPRING;
-    Area toLeft;
-    Area toRight ;
+    Area currentArea = Area.SPRING;
+    Location nextLeft;
+    Location nextRight;
+    int stepsRemaining = 10;
+    int scalesCollected = 0;
+    Danger eatenBy;
 
-    public Area getLocation() {
-        return location;
+    public Danger getEatenBy() {
+        return eatenBy;
     }
 
-    public void setLocation(Area location) {
-        this.location = location;
+    public void setEatenBy(Danger eatenBy) {
+        this.eatenBy = eatenBy;
     }
 
-    public Area getToLeft() {
-        return toLeft;
+    public void addScales(int amount) {
+        this.scalesCollected += amount;
     }
 
-    public void setToLeft(Area toLeft) {
-        this.toLeft = toLeft;
+    public void removeScales(int amount) {
+        this.scalesCollected -= amount;
     }
 
-    public Area getToRight() {
-        return toRight;
+    public int getScalesCollected() {
+        return scalesCollected;
     }
 
-    public void setToRight(Area toRight) {
-        this.toRight = toRight;
+    public void decreaseStepsRemaining() throws Exception {
+        if (this.stepsRemaining == 0) {
+            throw new Exception("Can not reducce stepsRemaining below 0");
+        }
+        this.stepsRemaining -= 1;
+    }
+
+    public int getStepsRemaining() {
+        return stepsRemaining;
+    }
+
+    public Location getNextLeft() {
+        return nextLeft;
+    }
+
+    public void setNextLeft(Location nextLeft) {
+        this.nextLeft = nextLeft;
+    }
+
+    public Location getNextRight() {
+        return nextRight;
+    }
+
+    public void setNextRight(Location nextRight) {
+        this.nextRight = nextRight;
+    }
+
+    public Area getCurrentArea() {
+        return currentArea;
+    }
+
+    public void setCurrentArea(Area currentArea) {
+        this.currentArea = currentArea;
     }
 }
